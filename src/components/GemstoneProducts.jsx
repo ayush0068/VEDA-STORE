@@ -79,8 +79,8 @@ export const defaultProducts = [
     benefit: "Divine Luck, Prosperity, Blissful Matrimony",
     description:
       "A Vedic gemstone for Jupiter, worn for wisdom, prosperity and a blissful married life. Natural and lab-certified.",
-    image: ["/image/Yellow_Sapphire.png"],
-    gallery: ["/image/Yellow_Sapphire_2.png"],
+    image: "/image/Yellow_Sapphire.png",
+    gallery: ["/image/Yellow_Sapphire.png"],
     fallbackFrom: "#FDE68A",
     fallbackTo: "#B8860B",
     rating: 5,
@@ -99,8 +99,8 @@ export const defaultProducts = [
     benefit: "Great Fame, Discipline, Reverses Misfortunes",
     description:
       "Saturn's gemstone, known for its fast, powerful results — discipline, career growth and protection from misfortune.",
-    image: ["/image/Blue_Sapphire.png"],
-    gallery: ["/image/Blue_Sapphire_2.png"],
+    image: "/image/Blue_Sapphire.png",
+    gallery: ["/image/Blue_Sapphire.png"],
     fallbackFrom: "#93C5FD",
     fallbackTo: "#1E3A8A",
     rating: 5,
@@ -119,8 +119,8 @@ export const defaultProducts = [
     benefit: "Vocal Charm, Creativity, Success in Business",
     description:
       "Mercury's gemstone for clear communication, creativity and success in business and studies.",
-    image: ["/image/Emerald.png"],
-    gallery: ["/image/Emerald_2.png"],
+    image: "/image/Emerald.png",
+    gallery: ["/image/Emerald.png"],
     fallbackFrom: "#6EE7B7",
     fallbackTo: "#065F46",
     rating: 4,
@@ -139,8 +139,8 @@ export const defaultProducts = [
     benefit: "Great Health, Will Power, Fame & Reputation",
     description:
       "The Sun's gemstone — worn for vitality, leadership, willpower and lasting fame and reputation.",
-    image: ["/image/Ruby.png"],
-    gallery: ["/image/Ruby_2.png"],
+    image: "/image/Ruby.png",
+    gallery: ["/image/Ruby.png"],
     fallbackFrom: "#FCA5A5",
     fallbackTo: "#7F1D1D",
     rating: 5,
@@ -249,7 +249,7 @@ function Stars({ rating = 5, size = 13 }) {
   );
 }
 
-function GemMedallion({ product, className = "" }) {
+export function GemMedallion({ product, className = "" }) {
   const [imgFailed, setImgFailed] = useState(false);
   const showFallback = !product.image || imgFailed;
 
@@ -273,8 +273,9 @@ function GemMedallion({ product, className = "" }) {
   );
 }
 
-function ProductCard({ product, onQuickView, onAdd, showPrice = true, showQuickView = true, onCardClick }) {
+function ProductCard({ product, onQuickView, onAdd, showPrice = true, showQuickView = true, showAddToCart = true, onCardClick }) {
   const [wished, setWished] = useState(false);
+  const showFooterRow = showPrice || showAddToCart;
 
   // On the home grid, onCardClick is set (navigate to this gemstone's own
   // dynamic page) and takes over from the Quick View modal. Everywhere else
@@ -381,36 +382,40 @@ function ProductCard({ product, onQuickView, onAdd, showPrice = true, showQuickV
 
         <div className="my-1.5 h-px w-full bg-[#3A2417]/10" />
 
-        <div className={`flex items-center gap-3 ${showPrice ? "justify-between" : "justify-end"}`}>
-          {showPrice && (
-            <div className="flex items-baseline gap-2">
-              <span className="text-[18px] font-extrabold text-[#3A2417]">{product.price}</span>
-              {product.originalPrice && (
-                <span className="text-[13px] text-[#3A2417]/40 line-through">{product.originalPrice}</span>
-              )}
-            </div>
-          )}
+        {showFooterRow && (
+          <div className={`flex items-center gap-3 ${showPrice ? "justify-between" : "justify-end"}`}>
+            {showPrice && (
+              <div className="flex items-baseline gap-2">
+                <span className="text-[18px] font-extrabold text-[#3A2417]">{product.price}</span>
+                {product.originalPrice && (
+                  <span className="text-[13px] text-[#3A2417]/40 line-through">{product.originalPrice}</span>
+                )}
+              </div>
+            )}
 
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onAdd?.(product);
-            }}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#E9A331]/40 bg-[#FAF6F0] px-4 py-2 text-[13px] font-bold text-[#3A2417] transition-colors hover:border-[#E9A331] hover:bg-[#FDF0DC] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3A2417]"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M6 7h12l-1 12.5a1.5 1.5 0 01-1.5 1.5h-7a1.5 1.5 0 01-1.5-1.5L6 7z"
-                fill="none"
-                stroke="#3A2417"
-                strokeWidth="1.6"
-              />
-              <path d="M9 7a3 3 0 016 0" fill="none" stroke="#3A2417" strokeWidth="1.6" />
-            </svg>
-            Add
-          </button>
-        </div>
+            {showAddToCart && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAdd?.(product);
+                }}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#E9A331]/40 bg-[#FAF6F0] px-4 py-2 text-[13px] font-bold text-[#3A2417] transition-colors hover:border-[#E9A331] hover:bg-[#FDF0DC] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3A2417]"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M6 7h12l-1 12.5a1.5 1.5 0 01-1.5 1.5h-7a1.5 1.5 0 01-1.5-1.5L6 7z"
+                    fill="none"
+                    stroke="#3A2417"
+                    strokeWidth="1.6"
+                  />
+                  <path d="M9 7a3 3 0 016 0" fill="none" stroke="#3A2417" strokeWidth="1.6" />
+                </svg>
+                Add
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -638,6 +643,7 @@ export default function GemstoneProducts({
   // full-featured card (e.g. on a gemstone's own page) — no change there.
   showPrice = true,
   showQuickView = true,
+  showAddToCart = true,
   linkToDetail = false,
 }) {
   const fallbackProducts = useMemo(() => products || defaultProducts, [products]);
@@ -694,6 +700,7 @@ export default function GemstoneProducts({
               onAdd={onAdd}
               showPrice={showPrice}
               showQuickView={showQuickView}
+              showAddToCart={showAddToCart}
               onCardClick={linkToDetail ? (p) => navigate(`/gemstone/${p.id}`) : undefined}
             />
           ))}

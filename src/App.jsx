@@ -13,9 +13,9 @@ function HomePage() {
   return (
     <div>
       <GemstoneHero />
-      {/* Home grid: no price, no Quick View — clicking a card opens
-          that gemstone's own page (the single dynamic page below). */}
-      <GemstoneProducts showPrice={false} showQuickView={false} linkToDetail />
+      {/* Home grid: no price, no Quick View, no Add to Cart — the card
+          is purely a navigation tile to that gemstone's own page. */}
+      <GemstoneProducts showPrice={false} showQuickView={false} showAddToCart={false} linkToDetail />
     </div>
   );
 }

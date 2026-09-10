@@ -1,4 +1,5 @@
 import GemstoneHero from "./components/GemstoneHero";
+import GemstoneProducts from "./components/GemstoneProducts";
 
 /**
  * Demo shell — a placeholder header/footer stand in for the EXISTING
@@ -14,6 +15,7 @@ function App() {
       </div>
 
       <GemstoneHero />
+      <GemstoneProducts />
 
     </div>
   );

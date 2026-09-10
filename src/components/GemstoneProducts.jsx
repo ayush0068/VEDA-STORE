@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useGemstoneProducts } from "../hooks/useGemstoneProducts";
 
 /**
@@ -70,7 +71,7 @@ import { useGemstoneProducts } from "../hooks/useGemstoneProducts";
 
 // Sample catalog so the section isn't empty out of the box — replace
 // any entry, or pass your own `products` prop, whenever you're ready.
-const defaultProducts = [
+export const defaultProducts = [
   {
     id: "yellow-sapphire",
     name: "Yellow Sapphire",
@@ -78,8 +79,8 @@ const defaultProducts = [
     benefit: "Divine Luck, Prosperity, Blissful Matrimony",
     description:
       "A Vedic gemstone for Jupiter, worn for wisdom, prosperity and a blissful married life. Natural and lab-certified.",
-    image: ["public/image/Yellow_Sapphire.png"],
-    gallery: ["public/image/Yellow_Sapphire_2.png"],
+    image: ["/image/Yellow_Sapphire.png"],
+    gallery: ["/image/Yellow_Sapphire_2.png"],
     fallbackFrom: "#FDE68A",
     fallbackTo: "#B8860B",
     rating: 5,
@@ -98,8 +99,8 @@ const defaultProducts = [
     benefit: "Great Fame, Discipline, Reverses Misfortunes",
     description:
       "Saturn's gemstone, known for its fast, powerful results — discipline, career growth and protection from misfortune.",
-    image: ["public/image/Blue_Sapphire.png"],
-    gallery: ["public/image/Blue_Sapphire_2.png"],
+    image: ["/image/Blue_Sapphire.png"],
+    gallery: ["/image/Blue_Sapphire_2.png"],
     fallbackFrom: "#93C5FD",
     fallbackTo: "#1E3A8A",
     rating: 5,
@@ -118,8 +119,8 @@ const defaultProducts = [
     benefit: "Vocal Charm, Creativity, Success in Business",
     description:
       "Mercury's gemstone for clear communication, creativity and success in business and studies.",
-    image: ["public/image/Emerald.png"],
-    gallery: ["public/image/Emerald_2.png"],
+    image: ["/image/Emerald.png"],
+    gallery: ["/image/Emerald_2.png"],
     fallbackFrom: "#6EE7B7",
     fallbackTo: "#065F46",
     rating: 4,
@@ -138,8 +139,8 @@ const defaultProducts = [
     benefit: "Great Health, Will Power, Fame & Reputation",
     description:
       "The Sun's gemstone — worn for vitality, leadership, willpower and lasting fame and reputation.",
-    image: ["public/image/Ruby.png"],
-    gallery: ["public/image/Ruby_2.png"],
+    image: ["/image/Ruby.png"],
+    gallery: ["/image/Ruby_2.png"],
     fallbackFrom: "#FCA5A5",
     fallbackTo: "#7F1D1D",
     rating: 5,
@@ -272,14 +273,42 @@ function GemMedallion({ product, className = "" }) {
   );
 }
 
-function ProductCard({ product, onQuickView, onAdd }) {
+function ProductCard({ product, onQuickView, onAdd, showPrice = true, showQuickView = true, onCardClick }) {
   const [wished, setWished] = useState(false);
 
+  // On the home grid, onCardClick is set (navigate to this gemstone's own
+  // dynamic page) and takes over from the Quick View modal. Everywhere else
+  // (the gemstone's own page) this stays undefined and the card behaves
+  // exactly as before — clicking the image/pill opens the Quick View modal.
+  const handleMediaClick = (e) => {
+    e.stopPropagation();
+    if (onCardClick) onCardClick(product);
+    else onQuickView(product);
+  };
+
   return (
-    <div className="gp-animate-card group relative flex flex-col overflow-hidden rounded-2xl border border-[#3A2417]/10 bg-white shadow-[0_18px_40px_-24px_rgba(58,36,23,0.35)] transition-transform duration-300 hover:-translate-y-1.5 hover:shadow-[0_26px_55px_-22px_rgba(58,36,23,0.45)]">
+    <div
+      onClick={onCardClick ? () => onCardClick(product) : undefined}
+      role={onCardClick ? "link" : undefined}
+      tabIndex={onCardClick ? 0 : undefined}
+      onKeyDown={
+        onCardClick
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onCardClick(product);
+              }
+            }
+          : undefined
+      }
+      aria-label={onCardClick ? `View ${product.name}` : undefined}
+      className={`gp-animate-card group relative flex flex-col overflow-hidden rounded-2xl border border-[#3A2417]/10 bg-white shadow-[0_18px_40px_-24px_rgba(58,36,23,0.35)] transition-transform duration-300 hover:-translate-y-1.5 hover:shadow-[0_26px_55px_-22px_rgba(58,36,23,0.45)] ${
+        onCardClick ? "cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3A2417]" : ""
+      }`}
+    >
       {/* image / plinth area */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-[radial-gradient(ellipse_75%_65%_at_50%_30%,#F5B041_0%,#E9A331_55%,#8a5a1f_100%)]">
-        {product.badge && (
+        {showPrice && product.badge && (
           <span className="absolute left-3 top-3 z-20 rounded-full bg-[#3A2417] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-[#FAF6F0] shadow-sm">
             {product.badge}
           </span>
@@ -287,7 +316,10 @@ function ProductCard({ product, onQuickView, onAdd }) {
 
         <button
           type="button"
-          onClick={() => setWished((v) => !v)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setWished((v) => !v);
+          }}
           aria-pressed={wished}
           aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
           className="absolute right-3 top-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3A2417]"
@@ -306,30 +338,32 @@ function ProductCard({ product, onQuickView, onAdd }) {
         {/* full-bleed product image — fills the whole area, replacing the gold plinth once a real photo is set */}
         <button
           type="button"
-          onClick={() => onQuickView(product)}
-          aria-label={`Quick view ${product.name}`}
+          onClick={handleMediaClick}
+          aria-label={onCardClick ? `View ${product.name}` : `Quick view ${product.name}`}
           className="absolute inset-0 flex items-center justify-center"
         >
           <GemMedallion product={product} className="h-full w-full transition-transform duration-300 group-hover:scale-[1.04]" />
         </button>
 
-        {/* Quick View — floating pill, clear of the edges, slides up on hover/focus */}
-        <button
-          type="button"
-          onClick={() => onQuickView(product)}
-          className="absolute bottom-3 left-1/2 z-20 inline-flex -translate-x-1/2 translate-y-3 items-center gap-1.5 whitespace-nowrap rounded-full border border-[#3A2417]/10 bg-white px-4 py-2 text-[12.5px] font-bold text-[#3A2417] opacity-0 shadow-[0_10px_22px_-8px_rgba(58,36,23,0.4)] transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"
-              fill="none"
-              stroke="#3A2417"
-              strokeWidth="1.7"
-            />
-            <circle cx="12" cy="12" r="3" fill="none" stroke="#3A2417" strokeWidth="1.7" />
-          </svg>
-          Quick View
-        </button>
+        {/* Quick View — floating pill, clear of the edges, slides up on hover/focus. Hidden on the home grid. */}
+        {showQuickView && (
+          <button
+            type="button"
+            onClick={handleMediaClick}
+            className="absolute bottom-3 left-1/2 z-20 inline-flex -translate-x-1/2 translate-y-3 items-center gap-1.5 whitespace-nowrap rounded-full border border-[#3A2417]/10 bg-white px-4 py-2 text-[12.5px] font-bold text-[#3A2417] opacity-0 shadow-[0_10px_22px_-8px_rgba(58,36,23,0.4)] transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"
+                fill="none"
+                stroke="#3A2417"
+                strokeWidth="1.7"
+              />
+              <circle cx="12" cy="12" r="3" fill="none" stroke="#3A2417" strokeWidth="1.7" />
+            </svg>
+            Quick View
+          </button>
+        )}
       </div>
 
       {/* content */}
@@ -347,17 +381,22 @@ function ProductCard({ product, onQuickView, onAdd }) {
 
         <div className="my-1.5 h-px w-full bg-[#3A2417]/10" />
 
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-baseline gap-2">
-            <span className="text-[18px] font-extrabold text-[#3A2417]">{product.price}</span>
-            {product.originalPrice && (
-              <span className="text-[13px] text-[#3A2417]/40 line-through">{product.originalPrice}</span>
-            )}
-          </div>
+        <div className={`flex items-center gap-3 ${showPrice ? "justify-between" : "justify-end"}`}>
+          {showPrice && (
+            <div className="flex items-baseline gap-2">
+              <span className="text-[18px] font-extrabold text-[#3A2417]">{product.price}</span>
+              {product.originalPrice && (
+                <span className="text-[13px] text-[#3A2417]/40 line-through">{product.originalPrice}</span>
+              )}
+            </div>
+          )}
 
           <button
             type="button"
-            onClick={() => onAdd?.(product)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAdd?.(product);
+            }}
             className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#E9A331]/40 bg-[#FAF6F0] px-4 py-2 text-[13px] font-bold text-[#3A2417] transition-colors hover:border-[#E9A331] hover:bg-[#FDF0DC] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3A2417]"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
@@ -593,6 +632,13 @@ export default function GemstoneProducts({
   // `enabled: true` once VITE_SHOPIFY_STORE_DOMAIN and
   // VITE_SHOPIFY_STOREFRONT_TOKEN are set in your .env — see README.
   shopify = { enabled: false, collectionHandle: "gemstones", first: 12 },
+  // Home-grid mode: hide price/Quick View and send clicks to the shared
+  // dynamic gemstone page (/gemstone/:id) instead of opening Quick View.
+  // Leave all three at their defaults anywhere you want the original,
+  // full-featured card (e.g. on a gemstone's own page) — no change there.
+  showPrice = true,
+  showQuickView = true,
+  linkToDetail = false,
 }) {
   const fallbackProducts = useMemo(() => products || defaultProducts, [products]);
 
@@ -603,6 +649,7 @@ export default function GemstoneProducts({
     fallback: fallbackProducts,
   });
 
+  const navigate = useNavigate();
   const [quickViewProduct, setQuickViewProduct] = useState(null);
 
   return (
@@ -645,6 +692,9 @@ export default function GemstoneProducts({
               product={product}
               onQuickView={setQuickViewProduct}
               onAdd={onAdd}
+              showPrice={showPrice}
+              showQuickView={showQuickView}
+              onCardClick={linkToDetail ? (p) => navigate(`/gemstone/${p.id}`) : undefined}
             />
           ))}
         </div>
